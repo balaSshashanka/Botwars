@@ -8,15 +8,20 @@ import GameConfig
 
 @implementer(Bot.Bot)
 class UserBot(object):
-
+	__i = 0
+	__j = 0
 	def makeMove(self,isLastMoveHit,isBoatsDestroyed):
-		x = ra.randrange(1,GameConfig.GameConfig.ROWS)
-		y = ra.randrange(1,GameConfig.GameConfig.COLUMNS)
+		x = self.__i
+		y = self.__j
+		self.__j = self.__j+1
+		if(self.__j == 10):
+			self.__i = self.__i + 1
+			self.__j = 0
 		return Block.Block(x,y)
 
 	def positionBoats(self,boats):
-		for i in xrange(len(boats)):
-			pass
+		'''for i in range(5):
+			pass'''
 
 		return boats
 		

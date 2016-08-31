@@ -8,25 +8,26 @@ import Board
 import Boat
 import GameConfig
 import ComputerBot
+import Block
 
 class Controller(object):
 
 	def __init__(self):
-		self.UserBot = UserBot.UserBot()
-		self.ComputerBot = ComputerBot.ComputerBot()
+		self.userBot = UserBot.UserBot()
+		self.computerBot = ComputerBot.ComputerBot()
 		self.output = {}
 		self.moves = []
-		self.gameDetails = json.dumps({})
-		self.currentTurn = randrange(1,3)
+		self.gameDetails = {}
+		self.currentTurn = random.randrange(1,3)
 
-	def initializeBoatArrangement():
-		boats = [Boats.Boat() for i in range(GameConfig.GameConfig.constants.NBOTS)]
+	def initializeBoatArrangement(self):
+		boats = [Boat.Boat(GameConfig.GameConfig.BoatType.AIRCRAFT,Block.Block(0,0),Block.Block(0,2)) for i in range(GameConfig.GameConfig.constants.NBOTS)]
 
-		boats[0] = Boat.Boat(GameConfig.GameConfig.BoatType.AIRCRAFT,Block.Block(0,0),Block.Block(0,2))
-		boats[1] = Boat.Boat(GameConfig.GameConfig.BoatType.BATTLESHIP,Block.Block(1,3),Block.Block(4,5))
-		boats[2] = Boat.Boat(GameConfig.GameConfig.BoatType.SUBMARINE,Block.Block(4,7),Block.Block(7,7))
-		boats[3] = Boat.Boat(GameConfig.GameConfig.BoatType.DESTROYER,Block.Block(6,8),Block.Block(8,8))
-		boats[4] = Boat.Boat(GameConfig.GameConfig.BoatType.PATROL,Block.Block(1,1),Block.Block(1,2))
+		boats[0] = Boat.Boat(GameConfig.GameConfig.BoatType.AIRCRAFT,Block.Block(5,2),Block.Block(5,5))
+		boats[1] = Boat.Boat(GameConfig.GameConfig.BoatType.BATTLESHIP,Block.Block(0,0),Block.Block(4,0))
+		boats[2] = Boat.Boat(GameConfig.GameConfig.BoatType.SUBMARINE,Block.Block(1,9),Block.Block(3,9))
+		boats[3] = Boat.Boat(GameConfig.GameConfig.BoatType.DESTROYER,Block.Block(7,2),Block.Block(9,2))
+		boats[4] = Boat.Boat(GameConfig.GameConfig.BoatType.PATROL,Block.Block(7,6),Block.Block(8,6))
 
 		return boats
 	def getBoatSize(self):
@@ -44,7 +45,7 @@ class Controller(object):
 			return -1
 
 	def validateBoatPosition(self,boats):
-		if(len(boats) ~= GameConfig.GameConfig.constants.NBOTS):
+		if(len(boats) != GameConfig.GameConfig.constants.NBOTS):
 			return False
 
 		allBoatTypes = []
@@ -53,7 +54,7 @@ class Controller(object):
 				return False
 			allBoatTypes.append(boats[i].type)
 		for i in range(len(boats)):
-			if(((boats[i].getStartBlock().getX() == boats[i].getEndBlock().getX() ) || (boats[i].getStartBlock().getY() == boats[i].getEndBlock().getY())) == False):
+			if(((boats[i].getStartBlock().getX() == boats[i].getEndBlock().getX() ) or (boats[i].getStartBlock().getY() == boats[i].getEndBlock().getY())) == False):
 				print('Diagonal Constraint')
 				return False
 			if((getBoatSize(boats[i]) == boats[i].getBoatSizeBlock()) == False):
@@ -72,12 +73,13 @@ class Controller(object):
 
 		return True
 
-	def start():
+	def start(self):
 		userBoard = Board.Board()
 		computerBoard = Board.Board()
 
-		userBoard = initializeBoatArrangement()
-		userBoard.placeBoats(userBot.positionBoats(userBoats))
+		userBoats = self.initializeBoatArrangement()
+		print(userBoats)
+		userBoard.placeBoats(self.userBot.positionBoats(userBoats))
 
 		uBoatList = []
 		for i in range(len(userBoats)):
@@ -89,9 +91,9 @@ class Controller(object):
 			boats["endColumn"]=userBoats[i].endBlock.getY()
 			boats["Boat"]=i
 			uBoatList.append(boats)
-
-		computerBoats = initialBoatArrangement()
-		computerBoard.placeBoats(computerBot.positionBoats(computerBoats))
+		
+		computerBoats = self.initializeBoatArrangement()
+		computerBoard.placeBoats(self.computerBot.positionBoats(computerBoats))
 
 		cBotList = []
 		for i in range(len(computerBoats)):
@@ -102,67 +104,71 @@ class Controller(object):
 			boats["endRow"]=computerBoats[i].endBlock.getX()
 			boats["endColumn"]=computerBoats[i].endBlock.getY()
 			boats["Boat"]=i
-			cBoatList.append(boats)
+			cBotList.append(boats)
 
-		gameDetails.dumps("UserBots",uBoatList)
-		gameDetails.dumps("ComputerBots",cBoatList)
+		self.gameDetails["UserBots"] = uBoatList
+		self.gameDetails["ComputerBots"] = cBotList
 
-		play(userBoard,computerBoard)
+		self.play(userBoard,computerBoard)
 
-		winner = declareWinner(userBoard, computerBoard)
+		winner = self.declareWinner(userBoard, computerBoard)
 
 		if winner == GameConfig.GameConfig.constants.USERBOT :
 			print("Winner is UserBot")
-		else if winner == GameConfig.GameConfig.constants.COMPUTERBOT :
+		elif winner == GameConfig.GameConfig.constants.COMPUTERBOT :
 			print("Winner is ComputerBot")
 
 
 	def declareWinner(self,userBoard,computerBoard):
-		if(userBoard.isAllBoatsBlasted())
+		if(userBoard.isAllBoatsBlasted()):
 			return GameConfig.GameConfig.constants.COMPUTERBOT
-		else
+		else:
 			return GameConfig.GameConfig.constants.USERBOT
 
 	def play(self,userBoard,computerBoard):
 		while userBoard.isAllBoatsBlasted() == False and computerBoard.isAllBoatsBlasted() == False : 
-			makeMove(userBoard, computerBoard)
+			self.makeMove(userBoard, computerBoard)
 
 	def makeMove(self,userBoard,computerBoard):
 		move = {}
 
-		if(currentTurn == GameConfig.GameConfig.constants.USERBOT):
-			block = userBot.makeMove(computerBoard.isLastMoveHit(), computerBoard.getAllBoatsStatus())
+		if(self.currentTurn == GameConfig.GameConfig.constants.USERBOT):
+			block = self.userBot.makeMove(computerBoard.getlastMoveStatus(), computerBoard.getAllBoatsStatus())
 			hit = computerBoard.dropBombOnBlock(block)
 
 			if(hit != GameConfig.GameConfig.MoveStatus.HIT):
-				currentTurn = GameConfig.GameConfig.constants.COMPUTERBOT
+				self.currentTurn = GameConfig.GameConfig.constants.COMPUTERBOT
 
 			if hit != GameConfig.GameConfig.MoveStatus.INVALID:
 				move["player"]="UserBot"
 				move["row"]=block.getX()
 				move["column"]=block.getY()
-				move["hit"]=hit
+				if hit == GameConfig.GameConfig.MoveStatus.HIT:
+					move["hit"]=True
+				else:
+					move["hit"]=False
 		else:
-			block = computerBot.makeMove(userBoard.isLastMoveHit(), userBoard.getAllBoatsStatus())
+			block = self.computerBot.makeMove(userBoard.getlastMoveStatus(), userBoard.getAllBoatsStatus())
 			hit = userBoard.dropBombOnBlock(block)
 
 			if(hit != GameConfig.GameConfig.MoveStatus.HIT):
-				currentTurn = GameConfig.GameConfig.constants.USERBOT
+				self.currentTurn = GameConfig.GameConfig.constants.USERBOT
 
 			if hit != GameConfig.GameConfig.MoveStatus.INVALID:
 				move["player"]="ComputerBot"
 				move["row"]=block.getX()
 				move["column"]=block.getY()
-				move["hit"]=hit
-
-		moves.append(move)
+				if hit == GameConfig.GameConfig.MoveStatus.HIT:
+					move["hit"]=True
+				else:
+					move["hit"]=False
+		if(len(move) > 0):
+			self.moves.append(move)
 
 	def generateJSONOutput(self):
 		try:
-			self.output['details'] = gameDetails
-			self.output['moves'] = moves
-			with open('Battleship.json', 'w') as outfile:
-				print(output)
-    			json.dump(output, outfile)
-		except Exception, e:
+			self.output['details'] = self.gameDetails
+			self.output['moves'] = self.moves
+			print(self.output)
+		except Exception as e:
 			raise e

@@ -15,7 +15,7 @@ class Boat(object):
 			return abs(self.startBlock.getX() - self.endBlock.getX())
 
 	def isBoatAttacked(self,block):
-		if(block.getX() >= startBlock.getX() and block.getX() <= endBlock.getX() and block.getY() >= startBlock.getY() and block.getY() <= endBlock.getY()):
+		if(block.getX() >= self.startBlock.getX() and block.getX() <= self.endBlock.getX() and block.getY() >= self.startBlock.getY() and block.getY() <= self.endBlock.getY()):
 			return True
 		else:
 			return False
@@ -23,7 +23,7 @@ class Boat(object):
 	def isBoatInBlock(self,block):
 		if block.getX() >= self.startBlock.getX() and block.getX() <= self.endBlock.getX() and block.getY() >= self.startBlock.getY() and block.getY() <= self.endBlock.getY():
 			return True
-		else
+		else:
 			return False
 
 	def setBoatLife(self,boatLife):
@@ -33,7 +33,7 @@ class Boat(object):
 		self.boatLife = self.boatLife - 1
 
 	def isBoatDestroyed(self):
-		if boatLife == 0:
+		if self.boatLife == 0:
 			return True
 		else:
 			return False
